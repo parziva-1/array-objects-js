@@ -6,12 +6,13 @@ function App() {
   const [text, setText] = useState("");
 
 
-  const renderTodos = (todo) => <div>{todo.name}</div>;
+  const renderTodos = (todo) => <div key={todo.name}>{todo.name}</div>;
+  
   const resultRenderTodos = todos.map(renderTodos)
-
   const handleInput = (event)=> setText(event.target.value)
 
-  const handleOnCick = ()=>setTodos([...todos,text])
+  const handleOnCick = ()=>setTodos([...todos,{name:text}])
+
 
   return (
     <main className="App">
