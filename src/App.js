@@ -3,53 +3,57 @@ import "./App.css";
 
 import useLocalStorage from "./lib/hooks/useLocalStorage";
 
+import Todo from "./Todo/Todo";
+
 //{
 //  name:"correr",
 //   id:0,
 //   status:true
-//   description:""
+//   description:"",
 //}
 
-function App() {
+function App(nombre = "jaime") {
   const [todos, setTodos] = useLocalStorage("todos", [
     { name: "caminar", id: 200, descripcion: "a las 4 pm", status: false },
   ]);
 
   const [name, setName] = useState("");
   const [descripcion, setDescription] = useState("");
-  const [id, setId] = useState(1);
+  const [id, setId] = useLocalStorage("id", 1);
 
   const [error, setError] = useState(false);
 
   const handleDeleTodo = (todoToDelete) =>
     setTodos(todos.filter(({ id }) => id !== todoToDelete));
 
-  const renderTodos = ({ name, id, status, descripcion }) => {
-    console.log(id, status);
-    return (
-      <div
-        style={{ display: "flex", justifyContent: "space-between" }}
-        key={id}
-      >
-        <div>
-          <p>name: {name}</p>
-          <p>descripcion: {descripcion}</p>
-        </div>
-        <input type="checkbox" checked={status} />
-        <button onClick={() => handleDeleTodo(id)}>X</button>
-      </div>
+  const handleChangeTodoStatus = (todoToChange) =>
+    setTodos(
+      todos.map((todo) =>
+        todo.id === todoToChange ? { ...todo, status: !todo.status } : todo
+      )
     );
-  };
 
-  const resultRenderTodos = todos.map(renderTodos);
   const handleInput = (event) => {
     setError(false);
     setName(event.target.value);
   };
 
   const handleInputDescription = (event) => {
-    setDescription(event.target.value)
+    setDescription(event.target.value);
   };
+
+  const renderTodos = (todo) => (
+    <Todo
+      key={todo.id}
+      todo={todo}
+      handleDeleTodo={handleDeleTodo}
+      handleChangeTodoStatus={handleChangeTodoStatus}
+    />
+  );
+
+  const todosUncompleted = todos.filter((todo)=>!todo.status).map(renderTodos);
+  const todosCopleted = todos.filter((todo)=>todo.status).map(renderTodos);
+  const todosAll = todos.map(renderTodos);
 
   const handleOnCick = () => {
     if (name === "") {
@@ -57,8 +61,8 @@ function App() {
       return;
     }
     setTodos([
-      ...todos,
       { name: name, status: false, id: id, descripcion: descripcion },
+      ...todos,
     ]);
     setId(id + 1);
     setName("");
@@ -66,18 +70,35 @@ function App() {
 
   const handleDeleteAllTodos = () => setTodos([]);
 
+console.log({todosUncompleted})
+console.log({todosCopleted})
+
   return (
     <main className="App">
       {error ? <p>no puedes agregar una tarea sin un nombre.</p> : ""}
-      <div style={{display:"flex"}}>
-        <div style={{display:"flex", flexDirection:"column"}}>
+      <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <input onChange={handleInput} value={name} placeholder="name"></input>
-          {name?<textarea onChange={handleInputDescription} value={descripcion} placeholder="description"></textarea>:""}
+          {name ? (
+            <textarea
+              onChange={handleInputDescription}
+              value={descripcion}
+              placeholder="description"
+            ></textarea>
+          ) : (
+            ""
+          )}
         </div>
         <button onClick={handleOnCick}>Add</button>
         <button onClick={handleDeleteAllTodos}>Delete All</button>
       </div>
-      <div>{resultRenderTodos}</div>
+      <p>Todo's completed</p>
+      <div>{todosCopleted}</div>
+      <p>Todo's uncompleted</p>
+      <div>{todosUncompleted}</div>
+      <p>Todo's</p>
+      <div>{todosAll}</div>
+
     </main>
   );
 }
